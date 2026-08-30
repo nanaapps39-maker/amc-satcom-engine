@@ -15,6 +15,7 @@ class SatcomRequest(BaseModel):
     message: str
     module: str
     log_text: str | None = None
+    timestamp: int | None = None
 
 # ======================================================
 # FASTAPI APP
