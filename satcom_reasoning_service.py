@@ -1,3 +1,29 @@
+# ================================================================
+# AMC ACADEMY TECH AI — SATCOM + BVLOS REASONING ENGINE
+# Python Microservice — FastAPI Build (OEM + Multi-Link)
+# ================================================================
+# Identity Layer:
+#   This reasoning engine operates under the AMC Academy Tech AI
+#   Autonomous Systems Lab the innovation core responsible for
+#   next‑generation SATCOM autonomy, RF‑chain modelling, BVLOS
+#   multi‑link failover logic, and advanced OEM-aware diagnostics.
+#
+# Engineering Purpose:
+#   Provide structured SATCOM reasoning, RF-chain analysis,
+#   multi-orbit link evaluation (GEO / LEO / L-Band), and
+#   autonomous decision support for maritime operations.
+#
+# Author:
+#   Nana Okai Ababio Appiah
+#   Founder — Apps Maritime Consultancy Ltd / AMC Academy Tech
+#
+# Notes:
+#   - Maintain vendor-neutral reasoning unless OEM context is provided.
+#   - Prioritise SATCOM accuracy and maritime operational relevance.
+#   - This file is part of AMC Academy Tech AI’s identity architecture.
+# ================================================================
+
+
 # ======================================================
 # AMC ACADEMY TECH AI — SATCOM + BVLOS REASONING ENGINE
 # Python Microservice — FastAPI Build (OEM + Multi-Link)
