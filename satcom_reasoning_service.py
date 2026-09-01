@@ -2,32 +2,6 @@
 # AMC ACADEMY TECH AI — SATCOM + BVLOS REASONING ENGINE
 # Python Microservice — FastAPI Build (OEM + Multi-Link)
 # ================================================================
-# Identity Layer:
-#   This reasoning engine operates under the AMC Academy Tech AI
-#   Autonomous Systems Lab the innovation core responsible for
-#   next‑generation SATCOM autonomy, RF‑chain modelling, BVLOS
-#   multi‑link failover logic, and advanced OEM-aware diagnostics.
-#
-# Engineering Purpose:
-#   Provide structured SATCOM reasoning, RF-chain analysis,
-#   multi-orbit link evaluation (GEO / LEO / L-Band), and
-#   autonomous decision support for maritime operations.
-#
-# Author:
-#   Nana Okai Ababio Appiah
-#   Founder — Apps Maritime Consultancy Ltd / AMC Academy Tech
-#
-# Notes:
-#   - Maintain vendor-neutral reasoning unless OEM context is provided.
-#   - Prioritise SATCOM accuracy and maritime operational relevance.
-#   - This file is part of AMC Academy Tech AI’s identity architecture.
-# ================================================================
-
-
-# ======================================================
-# AMC ACADEMY TECH AI — SATCOM + BVLOS REASONING ENGINE
-# Python Microservice — FastAPI Build (OEM + Multi-Link)
-# ======================================================
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -44,8 +18,8 @@ class LinkMetrics(BaseModel):
     jitter_ms: float
 
 class OemProfile(BaseModel):
-    vsatOem: str = "Intellian"   # Intellian, Cobham, KNS, JRC, etc.
-    leoOem: str = "Starlink"     # Starlink, OneWeb
+    vsatOem: str = "Intellian"   # Intellian, Cobham, KNS, JRC, Furuno, KVH, ThraneThane
+    leoOem: str = "Starlink"     # Starlink, OneWeb, SES_O3b
     lbandOem: str = "Iridium"    # Iridium, Inmarsat
 
 class SatcomRequest(BaseModel):
@@ -54,7 +28,6 @@ class SatcomRequest(BaseModel):
     log_text: str | None = None
     timestamp: int | None = None
 
-    # Optional BVLOS + OEM context
     vsatMetrics: LinkMetrics | None = None
     leoMetrics: LinkMetrics | None = None
     lbandMetrics: LinkMetrics | None = None
@@ -75,43 +48,63 @@ app.add_middleware(
 )
 
 # ======================================================
-# OEM PROFILES
+# OEM PROFILES — FULL LIST (Option A)
 # ======================================================
 
 OEM_PROFILES = {
-    "Intellian": {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
-    "Cobham": {"latencyWeight": 0.3, "jitterWeight": 0.4, "lossWeight": 0.3},
-    "KNS": {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
-    "JRC": {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
-    "Starlink": {"latencyWeight": 0.6, "jitterWeight": 0.2, "lossWeight": 0.2},
-    "OneWeb": {"latencyWeight": 0.5, "jitterWeight": 0.3, "lossWeight": 0.2},
-    "Inmarsat": {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
-    "Iridium": {"latencyWeight": 0.2, "jitterWeight": 0.2, "lossWeight": 0.6},
-    "Peplink": {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
+    "Intellian":   {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
+    "Cobham":      {"latencyWeight": 0.3, "jitterWeight": 0.4, "lossWeight": 0.3},
+    "KNS":         {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
+    "JRC":         {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
+
+    # NEW — Maritime VSAT OEMs
+    "Furuno":      {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
+    "KVH":         {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
+    "ThraneThane": {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
+
+    # NEW — LEO / MEO OEMs
+    "Starlink":    {"latencyWeight": 0.6, "jitterWeight": 0.2, "lossWeight": 0.2},
+    "OneWeb":      {"latencyWeight": 0.5, "jitterWeight": 0.3, "lossWeight": 0.2},
+    "SES_O3b":     {"latencyWeight": 0.5, "jitterWeight": 0.3, "lossWeight": 0.2},
+
+    # NEW — Maritime service providers
+    "Marlink":     {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
+    "Speedcast":   {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
+
+    # L-Band OEMs
+    "Inmarsat":    {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
+    "Iridium":     {"latencyWeight": 0.2, "jitterWeight": 0.2, "lossWeight": 0.6},
+
+    # SD-WAN / Bonding
+    "Peplink":     {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
 }
 
+# ======================================================
+# LINK HEALTH SCORING (simple OEM-aware)
+# ======================================================
+
 def compute_link_health(metrics: LinkMetrics, oem_name: str) -> float:
-  profile = OEM_PROFILES.get(oem_name, OEM_PROFILES["Intellian"])
-  score = 1.0
+    profile = OEM_PROFILES.get(oem_name, OEM_PROFILES["Intellian"])
+    score = 1.0
 
-  if metrics.latency_ms > 300 and metrics.latency_ms <= 600:
-      score -= 0.2 * profile["latencyWeight"]
-  elif metrics.latency_ms > 600 and metrics.latency_ms <= 800:
-      score -= 0.4 * profile["latencyWeight"]
-  elif metrics.latency_ms > 800:
-      score -= 0.6 * profile["latencyWeight"]
+    if metrics.latency_ms > 300 and metrics.latency_ms <= 600:
+        score -= 0.2 * profile["latencyWeight"]
+    elif metrics.latency_ms > 600 and metrics.latency_ms <= 800:
+        score -= 0.4 * profile["latencyWeight"]
+    elif metrics.latency_ms > 800:
+        score -= 0.6 * profile["latencyWeight"]
 
-  if metrics.packet_loss > 0.02 and metrics.packet_loss <= 0.05:
-      score -= 0.3 * profile["lossWeight"]
-  elif metrics.packet_loss > 0.05:
-      score -= 0.5 * profile["lossWeight"]
+    if metrics.packet_loss > 0.02 and metrics.packet_loss <= 0.05:
+        score -= 0.3 * profile["lossWeight"]
+    elif metrics.packet_loss > 0.05:
+        score -= 0.5 * profile["lossWeight"]
 
-  if metrics.jitter_ms > 40 and metrics.jitter_ms <= 80:
-      score -= 0.2 * profile["jitterWeight"]
-  elif metrics.jitter_ms > 80:
-      score -= 0.3 * profile["jitterWeight"]
+    if metrics.jitter_ms > 40 and metrics.jitter_ms <= 80:
+        score -= 0.2 * profile["jitterWeight"]
+    elif metrics.jitter_ms > 80:
+        score -= 0.3 * profile["jitterWeight"]
 
-  return max(0.0, min(1.0, score))
+    return max(0.0, min(1.0, score))
 
 # ======================================================
 # CORE DIAGNOSTIC ENGINE
@@ -121,28 +114,16 @@ def run_reasoning_engine(req: SatcomRequest):
     user_message = req.message
     log_text = req.log_text
 
-    # --------------------------------------------------
-    # 1. Parse user intent (SATCOM module)
-    # --------------------------------------------------
     intent = "general_satcom_issue"
     msg = user_message.lower()
 
-    if "tx" in msg:
-        intent = "transmit_issue"
-    if "rx" in msg:
-        intent = "receive_issue"
-    if "lock" in msg:
-        intent = "lock_failure"
-    if "acu" in msg:
-        intent = "antenna_control_issue"
-    if "modem" in msg:
-        intent = "modem_state_issue"
-    if "bslos" in msg or "bvlos" in msg:
-        intent = "bvlos_link_issue"
+    if "tx" in msg: intent = "transmit_issue"
+    if "rx" in msg: intent = "receive_issue"
+    if "lock" in msg: intent = "lock_failure"
+    if "acu" in msg: intent = "antenna_control_issue"
+    if "modem" in msg: intent = "modem_state_issue"
+    if "bvlos" in msg or "bslos" in msg: intent = "bvlos_link_issue"
 
-    # --------------------------------------------------
-    # 2. RF Chain Health Scoring (placeholder logic)
-    # --------------------------------------------------
     rf_scores = {
         "antenna_pointing": 0.82,
         "modem_state": 0.74,
@@ -151,9 +132,6 @@ def run_reasoning_engine(req: SatcomRequest):
         "satellite_visibility": 0.88,
     }
 
-    # --------------------------------------------------
-    # 3. Log analysis (if provided)
-    # --------------------------------------------------
     log_summary = "No logs provided."
     if log_text:
         lt = log_text.lower()
@@ -164,21 +142,19 @@ def run_reasoning_engine(req: SatcomRequest):
         else:
             log_summary = "Logs parsed successfully. No critical faults detected."
 
-    # --------------------------------------------------
-    # 4. BVLOS + OEM Link Health (if metrics provided)
-    # --------------------------------------------------
     bvlos_context = None
 
     if req.vsatMetrics and req.leoMetrics and req.lbandMetrics:
         oem = req.oemProfile or OemProfile()
+
         vsat_score = compute_link_health(req.vsatMetrics, oem.vsatOem)
         leo_score = compute_link_health(req.leoMetrics, oem.leoOem)
         lband_score = compute_link_health(req.lbandMetrics, oem.lbandOem)
 
         latency_ok = (
-            (req.vsatMetrics.latency_ms <= 800) or
-            (req.leoMetrics.latency_ms <= 800) or
-            (req.lbandMetrics.latency_ms <= 1200)
+            req.vsatMetrics.latency_ms <= 800 or
+            req.leoMetrics.latency_ms <= 800 or
+            req.lbandMetrics.latency_ms <= 1200
         )
 
         redundant_paths_up = (
@@ -204,12 +180,32 @@ def run_reasoning_engine(req: SatcomRequest):
             "compliance": {
                 "imo_solas": True,
                 "icao_uas": True,
-                "oem_peplink": True,
-                "oem_cobham": True,
+
+                # VSAT OEMs
                 "oem_intellian": True,
-                "oem_iridium": True,
+                "oem_cobham": True,
                 "oem_kns": True,
                 "oem_jrc": True,
+                "oem_furuno": True,
+                "oem_kvh": True,
+                "oem_thranethane": True,
+
+                # LEO / MEO
+                "oem_starlink": True,
+                "oem_oneweb": True,
+                "oem_ses_o3b": True,
+
+                # L-Band
+                "oem_inmarsat": True,
+                "oem_iridium": True,
+
+                # SD-WAN / Bonding
+                "oem_peplink": True,
+
+                # Maritime service providers
+                "oem_marlink": True,
+                "oem_speedcast": True,
+
                 "encryption": "AES-256",
                 "latencyOk": latency_ok,
                 "redundantPathsUp": redundant_paths_up,
@@ -217,9 +213,6 @@ def run_reasoning_engine(req: SatcomRequest):
             },
         }
 
-    # --------------------------------------------------
-    # 5. Recommended Fix (SATCOM + optional BVLOS)
-    # --------------------------------------------------
     recommended_fix = "Perform ACU re‑pointing and verify modem TX chain."
     if intent == "lock_failure":
         recommended_fix = "Check satellite visibility, verify ACU tracking, and inspect RX chain."
@@ -233,9 +226,6 @@ def run_reasoning_engine(req: SatcomRequest):
             "and verify SD‑WAN/SpeedFusion bonding configuration."
         )
 
-    # --------------------------------------------------
-    # 6. Final Summary
-    # --------------------------------------------------
     final_summary = (
         f"SATCOM diagnostic completed. Intent: {intent}. "
         f"RF chain scores analysed. Recommended fix provided."
@@ -243,9 +233,6 @@ def run_reasoning_engine(req: SatcomRequest):
     if bvlos_context:
         final_summary += " BVLOS link health and OEM compliance evaluated."
 
-    # --------------------------------------------------
-    # 7. Structured JSON Response
-    # --------------------------------------------------
     response = {
         "intent": intent,
         "module": req.module,
@@ -274,3 +261,4 @@ def diagnose(req: SatcomRequest):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
