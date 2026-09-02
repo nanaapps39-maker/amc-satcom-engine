@@ -107,6 +107,22 @@ def compute_link_health(metrics: LinkMetrics, oem_name: str) -> float:
     return max(0.0, min(1.0, score))
 
 # ======================================================
+# HISTORICAL VALIDATION LAYER
+# ======================================================
+
+def validate_history(data: dict) -> dict:
+    if not isinstance(data, dict):
+        return data
+
+    history = data.get("history")
+    if isinstance(history, dict):
+        # Ghana Independence Correction
+        if history.get("ghanaIndependence") == 1960:
+            history["ghanaIndependence"] = 1957
+
+    return data
+
+# ======================================================
 # CORE DIAGNOSTIC ENGINE
 # ======================================================
 
@@ -245,6 +261,9 @@ def run_reasoning_engine(req: SatcomRequest):
     if bvlos_context:
         response["bvlosContext"] = bvlos_context
 
+    # Apply historical validation
+    response = validate_history(response)
+
     return response
 
 # ======================================================
@@ -261,4 +280,3 @@ def diagnose(req: SatcomRequest):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
