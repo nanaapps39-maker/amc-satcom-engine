@@ -1,5 +1,5 @@
 # ================================================================
-# REBUILD TRIGGER — 2026-09-02
+# REBUILD TRIGGER — 2026-09-02 Test
 # Changing this line forces Render to rebuild the service
 # ================================================================
 
