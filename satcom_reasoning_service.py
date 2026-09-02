@@ -1,4 +1,10 @@
 # ================================================================
+# REBUILD TRIGGER — 2026-09-02
+# Changing this line forces Render to rebuild the service
+# ================================================================
+
+
+# ================================================================
 # AMC ACADEMY TECH AI — SATCOM + BVLOS REASONING ENGINE
 # Python Microservice — FastAPI Build (OEM + Multi-Link)
 # ================================================================
