@@ -18,9 +18,9 @@ class LinkMetrics(BaseModel):
     jitter_ms: float
 
 class OemProfile(BaseModel):
-    vsatOem: str = "Intellian"   # Intellian, Cobham, KNS, JRC, Furuno, KVH, ThraneThane
-    leoOem: str = "Starlink"     # Starlink, OneWeb, SES_O3b
-    lbandOem: str = "Iridium"    # Iridium, Inmarsat
+    vsatOem: str = "Intellian"
+    leoOem: str = "Starlink"
+    lbandOem: str = "Iridium"
 
 class SatcomRequest(BaseModel):
     message: str
@@ -48,7 +48,7 @@ app.add_middleware(
 )
 
 # ======================================================
-# OEM PROFILES — FULL LIST (Option A)
+# OEM PROFILES
 # ======================================================
 
 OEM_PROFILES = {
@@ -57,30 +57,25 @@ OEM_PROFILES = {
     "KNS":         {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
     "JRC":         {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
 
-    # NEW — Maritime VSAT OEMs
     "Furuno":      {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
     "KVH":         {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
     "ThraneThane": {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
 
-    # NEW — LEO / MEO OEMs
     "Starlink":    {"latencyWeight": 0.6, "jitterWeight": 0.2, "lossWeight": 0.2},
     "OneWeb":      {"latencyWeight": 0.5, "jitterWeight": 0.3, "lossWeight": 0.2},
     "SES_O3b":     {"latencyWeight": 0.5, "jitterWeight": 0.3, "lossWeight": 0.2},
 
-    # NEW — Maritime service providers
     "Marlink":     {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
     "Speedcast":   {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
 
-    # L-Band OEMs
     "Inmarsat":    {"latencyWeight": 0.3, "jitterWeight": 0.3, "lossWeight": 0.4},
     "Iridium":     {"latencyWeight": 0.2, "jitterWeight": 0.2, "lossWeight": 0.6},
 
-    # SD-WAN / Bonding
     "Peplink":     {"latencyWeight": 0.4, "jitterWeight": 0.3, "lossWeight": 0.3},
 }
 
 # ======================================================
-# LINK HEALTH SCORING (simple OEM-aware)
+# LINK HEALTH SCORING
 # ======================================================
 
 def compute_link_health(metrics: LinkMetrics, oem_name: str) -> float:
@@ -107,23 +102,7 @@ def compute_link_health(metrics: LinkMetrics, oem_name: str) -> float:
     return max(0.0, min(1.0, score))
 
 # ======================================================
-# HISTORICAL VALIDATION LAYER
-# ======================================================
-
-def validate_history(data: dict) -> dict:
-    if not isinstance(data, dict):
-        return data
-
-    history = data.get("history")
-    if isinstance(history, dict):
-        # Ghana Independence Correction
-        if history.get("ghanaIndependence") == 1960:
-            history["ghanaIndependence"] = 1957
-
-    return data
-
-# ======================================================
-# CORE DIAGNOSTIC ENGINE
+# CORE ENGINE
 # ======================================================
 
 def run_reasoning_engine(req: SatcomRequest):
@@ -196,8 +175,6 @@ def run_reasoning_engine(req: SatcomRequest):
             "compliance": {
                 "imo_solas": True,
                 "icao_uas": True,
-
-                # VSAT OEMs
                 "oem_intellian": True,
                 "oem_cobham": True,
                 "oem_kns": True,
@@ -205,23 +182,14 @@ def run_reasoning_engine(req: SatcomRequest):
                 "oem_furuno": True,
                 "oem_kvh": True,
                 "oem_thranethane": True,
-
-                # LEO / MEO
                 "oem_starlink": True,
                 "oem_oneweb": True,
                 "oem_ses_o3b": True,
-
-                # L-Band
                 "oem_inmarsat": True,
                 "oem_iridium": True,
-
-                # SD-WAN / Bonding
                 "oem_peplink": True,
-
-                # Maritime service providers
                 "oem_marlink": True,
                 "oem_speedcast": True,
-
                 "encryption": "AES-256",
                 "latencyOk": latency_ok,
                 "redundantPathsUp": redundant_paths_up,
@@ -260,9 +228,6 @@ def run_reasoning_engine(req: SatcomRequest):
 
     if bvlos_context:
         response["bvlosContext"] = bvlos_context
-
-    # Apply historical validation
-    response = validate_history(response)
 
     return response
 
