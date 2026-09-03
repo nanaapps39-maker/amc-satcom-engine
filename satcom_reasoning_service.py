@@ -81,6 +81,180 @@ OEM_PROFILES = {
 }
 
 # ======================================================
+# GLOBAL HISTORICAL DATASET (D3)
+# ======================================================
+
+HISTORICAL_DATA = {
+    "countries": {
+        "ghana": {
+            "independence_date": "6 March 1957",
+            "republic_date": "1960",
+            "notes": "First sub-Saharan African nation to gain independence from colonial rule."
+        },
+        "nigeria": {
+            "independence_date": "1 October 1960",
+            "republic_date": "1963",
+            "notes": "Gained independence from the UK; became a republic three years later."
+        },
+        "united kingdom": {
+            "independence_date": None,
+            "republic_date": None,
+            "notes": "Constitutional monarchy; not an independence case."
+        },
+        "united states": {
+            "independence_date": "4 July 1776",
+            "republic_date": "1789",
+            "notes": "Declaration of Independence in 1776; Constitution in force from 1789."
+        },
+        "india": {
+            "independence_date": "15 August 1947",
+            "republic_date": "26 January 1950",
+            "notes": "Independence from British rule; became a republic in 1950."
+        },
+        "china": {
+            "independence_date": "1 October 1949",
+            "republic_date": "1949",
+            "notes": "Founding of the People's Republic of China."
+        },
+        "south africa": {
+            "independence_date": "31 May 1910",
+            "republic_date": "31 May 1961",
+            "notes": "Union formed in 1910; became a republic in 1961."
+        },
+        "kenya": {
+            "independence_date": "12 December 1963",
+            "republic_date": "12 December 1964",
+            "notes": "Independence from the UK; republic one year later."
+        },
+        "tanzania": {
+            "independence_date": "9 December 1961",
+            "republic_date": "1962",
+            "notes": "Tanganyika independence; union with Zanzibar in 1964."
+        },
+        "egypt": {
+            "independence_date": "28 February 1922",
+            "republic_date": "18 June 1953",
+            "notes": "Formal independence from the UK; monarchy abolished in 1953."
+        },
+        "brazil": {
+            "independence_date": "7 September 1822",
+            "republic_date": "15 November 1889",
+            "notes": "Declared independence from Portugal; became a republic in 1889."
+        },
+        "canada": {
+            "independence_date": "1 July 1867",
+            "republic_date": None,
+            "notes": "Confederation in 1867; gradual independence; constitutional monarchy."
+        },
+        "australia": {
+            "independence_date": "1 January 1901",
+            "republic_date": None,
+            "notes": "Federation in 1901; constitutional monarchy."
+        },
+        "japan": {
+            "independence_date": None,
+            "republic_date": None,
+            "notes": "Long-standing sovereign state; constitutional monarchy."
+        },
+        "germany": {
+            "independence_date": "18 January 1871",
+            "republic_date": "9 November 1918",
+            "notes": "German Empire proclaimed in 1871; Weimar Republic in 1918."
+        },
+        "france": {
+            "independence_date": None,
+            "republic_date": "22 September 1792",
+            "notes": "First French Republic proclaimed in 1792."
+        },
+        "italy": {
+            "independence_date": "17 March 1861",
+            "republic_date": "2 June 1946",
+            "notes": "Unification in 1861; monarchy abolished in 1946."
+        },
+        "spain": {
+            "independence_date": None,
+            "republic_date": "14 April 1931",
+            "notes": "Second Spanish Republic proclaimed in 1931."
+        },
+        "russia": {
+            "independence_date": None,
+            "republic_date": "1917",
+            "notes": "Russian Republic briefly in 1917; Soviet Union formed later."
+        }
+        # You can extend this dictionary further as needed.
+    },
+    "ports": {
+        "tema": {
+            "country": "ghana",
+            "established_year": 1962,
+            "notes": "Port of Tema developed in the early 1960s as Ghana's main deep-sea port."
+        },
+        "new york": {
+            "country": "united states",
+            "established_year": 17_00,
+            "notes": "Port of New York developed over centuries; major expansion in the 19th–20th centuries."
+        },
+        "accra": {
+            "country": "ghana",
+            "established_year": 19_00,
+            "notes": "Accra historically a coastal trading hub; Tema became the main deep-sea port."
+        }
+    },
+    "satcom_history": {
+        "inmarsat": {
+            "founded": 1979,
+            "notes": "International Maritime Satellite Organization founded to provide maritime SATCOM."
+        },
+        "ses": {
+            "founded": 1985,
+            "notes": "Société Européenne des Satellites; major GEO operator."
+        },
+        "starlink": {
+            "founded": 2015,
+            "notes": "SpaceX LEO constellation project; maritime service launched in the 2020s."
+        },
+        "oneweb": {
+            "founded": 2012,
+            "notes": "LEO constellation focused on global broadband, including maritime."
+        },
+        "o3b": {
+            "founded": 2007,
+            "notes": "O3b Networks; MEO constellation for low-latency connectivity."
+        }
+    },
+    "aviation_bvlos": {
+        "icao": {
+            "key_milestones": [
+                "Early RPAS guidance in 2011–2015",
+                "BVLOS frameworks emerging mid-2010s",
+                "Ongoing UAS regulatory development into the 2020s"
+            ]
+        },
+        "faa": {
+            "key_milestones": [
+                "Part 107 (small UAS) in 2016",
+                "Waivers for BVLOS operations",
+                "Ongoing BVLOS rulemaking into late 2020s"
+            ]
+        }
+    }
+}
+
+HISTORICAL_KEYWORDS = [
+    "independence",
+    "history",
+    "when did",
+    "what year",
+    "founded",
+    "established",
+    "timeline",
+    "port built",
+    "maritime history",
+    "satcom history",
+    "bvlos history",
+]
+
+# ======================================================
 # LINK HEALTH SCORING
 # ======================================================
 
@@ -108,6 +282,73 @@ def compute_link_health(metrics: LinkMetrics, oem_name: str) -> float:
     return max(0.0, min(1.0, score))
 
 # ======================================================
+# HISTORICAL VALIDATION MODULE (H1 + D3)
+# ======================================================
+
+def run_historical_validation(message: str):
+    msg = message.lower()
+    query_detected = False
+    for kw in HISTORICAL_KEYWORDS:
+        if kw in msg:
+            query_detected = True
+            break
+
+    if not query_detected:
+        return {
+            "queryDetected": False,
+            "facts": {},
+            "confidence": "none",
+            "notes": "No historical query detected."
+        }
+
+    facts = {}
+    confidence = "medium"
+    notes = "Validated using internal historical dataset."
+
+    # Country-level checks
+    for country_key, data in HISTORICAL_DATA["countries"].items():
+        if country_key in msg:
+            facts[country_key] = {
+                "independence_date": data.get("independence_date"),
+                "republic_date": data.get("republic_date"),
+                "notes": data.get("notes"),
+            }
+            confidence = "high"
+
+    # Port-level checks
+    for port_key, data in HISTORICAL_DATA["ports"].items():
+        if port_key in msg:
+            facts[f"port_{port_key}"] = {
+                "country": data.get("country"),
+                "established_year": data.get("established_year"),
+                "notes": data.get("notes"),
+            }
+            confidence = "high"
+
+    # SATCOM history checks
+    for satcom_key, data in HISTORICAL_DATA["satcom_history"].items():
+        if satcom_key in msg or "satcom" in msg:
+            facts[f"satcom_{satcom_key}"] = {
+                "founded": data.get("founded"),
+                "notes": data.get("notes"),
+            }
+
+    # Aviation/BVLOS history checks
+    if "bvlos" in msg or "uas" in msg or "aviation" in msg:
+        facts["aviation_bvlos"] = HISTORICAL_DATA["aviation_bvlos"]
+
+    if not facts:
+        notes = "Historical query detected, but no matching entries found in dataset."
+        confidence = "low"
+
+    return {
+        "queryDetected": True,
+        "facts": facts,
+        "confidence": confidence,
+        "notes": notes,
+    }
+
+# ======================================================
 # CORE ENGINE
 # ======================================================
 
@@ -118,12 +359,18 @@ def run_reasoning_engine(req: SatcomRequest):
     intent = "general_satcom_issue"
     msg = user_message.lower()
 
-    if "tx" in msg: intent = "transmit_issue"
-    if "rx" in msg: intent = "receive_issue"
-    if "lock" in msg: intent = "lock_failure"
-    if "acu" in msg: intent = "antenna_control_issue"
-    if "modem" in msg: intent = "modem_state_issue"
-    if "bvlos" in msg or "bslos" in msg: intent = "bvlos_link_issue"
+    if "tx" in msg:
+        intent = "transmit_issue"
+    if "rx" in msg:
+        intent = "receive_issue"
+    if "lock" in msg:
+        intent = "lock_failure"
+    if "acu" in msg:
+        intent = "antenna_control_issue"
+    if "modem" in msg:
+        intent = "modem_state_issue"
+    if "bvlos" in msg or "bslos" in msg:
+        intent = "bvlos_link_issue"
 
     rf_scores = {
         "antenna_pointing": 0.82,
@@ -223,6 +470,9 @@ def run_reasoning_engine(req: SatcomRequest):
     if bvlos_context:
         final_summary += " BVLOS link health and OEM compliance evaluated."
 
+    # Run historical validation (H1 keyword-triggered)
+    historical_validation = run_historical_validation(user_message)
+
     response = {
         "intent": intent,
         "module": req.module,
@@ -230,6 +480,7 @@ def run_reasoning_engine(req: SatcomRequest):
         "rfChainScores": rf_scores,
         "recommendedFix": recommended_fix,
         "finalSummary": final_summary,
+        "historicalValidation": historical_validation,
     }
 
     if bvlos_context:
