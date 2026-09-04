@@ -1,5 +1,5 @@
 # ================================================================
-# REBUILD TRIGGER — 2026-09-04 Test
+# REBUILD TRIGGER — 2026-09-05 Test
 # Changing this line forces Render to rebuild the service
 # ================================================================
 
@@ -497,8 +497,17 @@ def diagnose(req: SatcomRequest):
     return run_reasoning_engine(req)
 
 # ======================================================
+# SATCOM v2 ENDPOINT (required by Node backend)
+# ======================================================
+
+@app.post("/reasoning")
+def reasoning(req: SatcomRequest):
+    return run_reasoning_engine(req)
+
+# ======================================================
 # RUN SERVER
 # ======================================================
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
