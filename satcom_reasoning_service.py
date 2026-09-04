@@ -505,9 +505,16 @@ def reasoning(req: SatcomRequest):
     return run_reasoning_engine(req)
 
 # ======================================================
+# HEALTH CHECK ENDPOINT (required by Node backend)
+# ======================================================
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "engine": "satcom-v2"}
+
+# ======================================================
 # RUN SERVER
 # ======================================================
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
