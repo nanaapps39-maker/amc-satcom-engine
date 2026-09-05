@@ -488,6 +488,53 @@ def run_reasoning_engine(req: SatcomRequest):
 
     return response
 
+
+# ======================================================
+# TELEMETRY + HEARTBEAT (SATCOM Engine v2)
+# ======================================================
+
+import psutil
+import time
+from datetime import datetime
+
+ENGINE_START_TIME = time.time()
+LAST_ERROR = None
+
+def record_error(err_msg: str):
+    global LAST_ERROR
+    LAST_ERROR = {
+        "message": err_msg,
+        "time": datetime.utcnow().isoformat() + "Z"
+    }
+
+def get_engine_telemetry():
+    """Return telemetry snapshot for Node.js /health endpoint."""
+    uptime_seconds = int(time.time() - ENGINE_START_TIME)
+
+    return {
+        "status": "ok",
+        "uptime_seconds": uptime_seconds,
+        "cpu_percent": psutil.cpu_percent(interval=0.1),
+        "memory_percent": psutil.virtual_memory().percent,
+        "last_error": LAST_ERROR
+    }
+
+@app.get("/heartbeat")
+def heartbeat():
+    """Lightweight heartbeat for Node.js SATCOM Engine connector."""
+    return get_engine_telemetry()
+
+@app.get("/health")
+def health():
+    """Full health check for Node.js /health route."""
+    return {
+        "status": "ok",
+        "engine": "satcom-v2",
+        "telemetry": get_engine_telemetry()
+    }
+
+
+
 # ======================================================
 # DIAGNOSE ENDPOINT
 # ======================================================
@@ -503,14 +550,6 @@ def diagnose(req: SatcomRequest):
 @app.post("/reasoning")
 def reasoning(req: SatcomRequest):
     return run_reasoning_engine(req)
-
-# ======================================================
-# HEALTH CHECK ENDPOINT (required by Node backend)
-# ======================================================
-
-@app.get("/health")
-def health():
-    return {"status": "ok", "engine": "satcom-v2"}
 
 # ======================================================
 # RUN SERVER
