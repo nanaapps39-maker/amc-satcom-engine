@@ -1,5 +1,5 @@
 # ================================================================
-# REBUILD TRIGGER — 2026-09-07 Deployment v24 
+# REBUILD TRIGGER — 2026-09-07 Deployment v25 
 # Changing this line forces Render to rebuild the service
 # ================================================================
 
