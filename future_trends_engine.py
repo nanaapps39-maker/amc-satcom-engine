@@ -1,3 +1,7 @@
+# ======================================================
+# FUTURE TRENDS ENGINE (Phase 2 → Phase 6)
+# ======================================================
+
 class FutureTrendsEngine:
     def __init__(self, prompt=None):
         self.phase = "Phase 2 - 5 Year Predictions"
@@ -11,10 +15,6 @@ class FutureTrendsEngine:
             return "Prompt file not found."
 
     def predict(self, years=5):
-        """
-        Phase 2: Structure only.
-        Real prediction logic will be added Monday evening.
-        """
         if years != 5:
             return {
                 "error": "Phase 2 only supports 5-year predictions.",
@@ -37,10 +37,6 @@ class FutureTrendsEngine:
         }
 
     def predict_10_year(self):
-        """
-        Phase 3: Structure only.
-        Real 10-year prediction logic will be added later.
-        """
         return {
             "engine": "future_trends_engine",
             "phase": "Phase 3 - 10 Year Predictions",
@@ -59,10 +55,6 @@ class FutureTrendsEngine:
         }
 
     def predict_20_year(self):
-        """
-        Phase 4: Structure only.
-        Real 20-year prediction logic will be added later.
-        """
         return {
             "engine": "future_trends_engine",
             "phase": "Phase 4 - 20 Year Predictions",
@@ -83,10 +75,6 @@ class FutureTrendsEngine:
         }
 
     def forecast_enterprise(self):
-        """
-        Phase 5: Structure only.
-        Real enterprise forecasting logic will be added later.
-        """
         return {
             "engine": "future_trends_engine",
             "phase": "Phase 5 - Enterprise Forecasting",
@@ -103,15 +91,7 @@ class FutureTrendsEngine:
             }
         }
 
-    # ============================================================
-    # ⭐ Phase 6 — Real Forecasting Logic (Final Completion)
-    # ============================================================
     def generate_forecast(self, years, domain):
-        """
-        Phase 6: Real forecasting logic.
-        Uses prompt + domain-specific rules.
-        """
-
         prompt_text = self.load_prompt()
 
         forecast = {
@@ -124,7 +104,6 @@ class FutureTrendsEngine:
             "confidence": "Medium"
         }
 
-        # Domain-specific logic
         if domain == "satcom":
             forecast["insights"].append(
                 f"SATCOM bandwidth demand expected to grow {5 * years}% over {years} years."
@@ -170,9 +149,6 @@ class FutureTrendsEngine:
 
         return forecast
 
-    # ============================================================
-    # ⭐ Unified Dispatcher (Phase 2 → Phase 6)
-    # ============================================================
     def predict_any(self, years, domain):
         if years == 5:
             return self.predict()
@@ -184,3 +160,4 @@ class FutureTrendsEngine:
             return self.forecast_enterprise()
         else:
             return self.generate_forecast(years, domain)
+
