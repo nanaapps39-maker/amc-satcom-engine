@@ -15,6 +15,18 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 # ======================================================
+# SATCOM INSIGHTS ENGINE (v3 Upgrade)
+# ======================================================
+
+# Wrapper for SATCOM Insights:
+# - Alarm clustering
+# - Severity scoring
+# - Beam region inference
+# Lives in: satcom_insights_engine.py
+from satcom_insights_engine import run_satcom_insights
+
+
+# ======================================================
 # REQUEST MODEL
 # ======================================================
 
@@ -522,6 +534,11 @@ def run_reasoning_engine(req: SatcomRequest):
     user_message = req.message
     log_text = req.log_text
 
+    # ======================================================
+    # SATCOM INSIGHTS ENGINE (v3 Upgrade)
+    # ======================================================
+    insights = run_satcom_insights(log_text)
+
     intent = "general_satcom_issue"
     msg = user_message.lower()
 
@@ -647,12 +664,14 @@ def run_reasoning_engine(req: SatcomRequest):
         "recommendedFix": recommended_fix,
         "finalSummary": final_summary,
         "historicalValidation": historical_validation,
+        "insights": insights
     }
 
     if bvlos_context:
         response["bvlosContext"] = bvlos_context
 
     return response
+
 
 
 # ======================================================
