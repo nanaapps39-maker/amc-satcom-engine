@@ -1,5 +1,5 @@
 # ================================================================
-# REBUILD TRIGGER — 2026-10-16 Deployment v41
+# REBUILD TRIGGER — 2026-10-16 Deployment v42
 # Changing this line forces Render to rebuild the service
 # AMC Academy Tech AI R&D Labs
 # ================================================================
@@ -65,6 +65,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ======================================================
+# SATCOM v3 — Rate‑Limit Bypass Middleware
+# ======================================================
+import asyncio
+import time
+
+LAST_CALL = 0
+MIN_INTERVAL = 0.05  # 50ms spacing to avoid Render throttling
+
+@app.middleware("http")
+async def satcom_rate_limit_bypass(request, call_next):
+    global LAST_CALL
+    now = time.time()
+
+    # If backend calls too fast during boot, space them out
+    if now - LAST_CALL < MIN_INTERVAL:
+        await asyncio.sleep(MIN_INTERVAL)
+
+    LAST_CALL = time.time()
+    response = await call_next(request)
+    return response
+
+
 
 # ======================================================
 # OEM PROFILES
