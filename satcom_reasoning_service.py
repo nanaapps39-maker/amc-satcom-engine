@@ -1,5 +1,5 @@
 # ================================================================
-# REBUILD TRIGGER — 2026-10-22 Deployment v51
+# REBUILD TRIGGER — 2026-10-23 Deployment v52
 # Changing this line forces Render to rebuild the service
 # AMC Academy Tech AI R&D Labs
 # ================================================================
