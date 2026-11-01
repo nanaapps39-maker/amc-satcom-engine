@@ -756,18 +756,47 @@ def run_reasoning_engine(req: SatcomRequest):
             },
         }
 
-    recommended_fix = "Perform ACU re‑pointing and verify modem TX chain."
-    if intent == "lock_failure":
-        recommended_fix = "Check satellite visibility, verify ACU tracking, and inspect RX chain."
-    elif intent == "modem_state_issue":
-        recommended_fix = "Restart modem, verify carrier acquisition, and check LNB power."
-    elif intent == "antenna_control_issue":
-        recommended_fix = "Inspect ACU gyro, GPS feed, and stabilization motors."
-    elif intent == "bvlos_link_issue" and bvlos_context:
+
+    if primary_cause == "network_congestion":
         recommended_fix = (
-            "Review VSAT/LEO/L‑Band link scores, ensure redundant paths are up, "
-            "and verify SD‑WAN/SpeedFusion bonding configuration."
+            "Review beam utilisation, inspect packet-loss trends, verify QoS policies "
+            "and investigate network congestion across the network path."
         )
+
+    elif primary_cause == "rf_signal_instability":
+        recommended_fix = (
+            "Inspect RF chain performance, verify BUC/LNB health, "
+            "review signal levels and confirm antenna alignment."
+        )
+
+    elif primary_cause == "weather_fade":
+        recommended_fix = (
+            "Monitor weather conditions, review fade margin levels "
+            "and verify adaptive coding and modulation performance."
+        )
+
+    elif primary_cause == "antenna_tracking_issue":
+        recommended_fix = (
+            "Inspect ACU gyro, GPS feed, stabilization motors "
+            "and antenna tracking performance."
+        )
+
+    elif primary_cause == "modem_state_issue":
+        recommended_fix = (
+            "Restart modem, verify carrier acquisition and check LNB power."
+        )
+
+    elif primary_cause == "bvlos_link_issue" and bvlos_context:
+        recommended_fix = (
+            "Review VSAT/LEO/L-Band link scores, ensure redundant paths are operational "
+            "and verify SD-WAN/SpeedFusion bonding configuration."
+        )
+
+    else:
+        recommended_fix = (
+            "Perform ACU re-pointing and verify modem TX chain."
+        ) 
+
 
     final_summary = (
          f"SATCOM diagnostic completed. "
