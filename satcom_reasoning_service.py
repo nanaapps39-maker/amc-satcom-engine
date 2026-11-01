@@ -647,6 +647,17 @@ def run_reasoning_engine(req: SatcomRequest):
         key=diagnostic_scores.get
     )
 
+    sorted_causes = sorted(
+       diagnostic_scores.items(),
+       key=lambda x: x[1],
+       reverse=True
+    )
+
+    if len(sorted_causes) > 1:
+        secondary_cause = sorted_causes[1][0]
+    else:
+        secondary_cause = primary_cause
+
     highest_score = max(diagnostic_scores.values())
 
     if highest_score >= 8:
@@ -835,9 +846,25 @@ def health():
 # DIAGNOSE ENDPOINT
 # ======================================================
 
+from fastapi import HTTPException
+import traceback
+
 @app.post("/diagnose")
 def diagnose(req: SatcomRequest):
-    return run_reasoning_engine(req)
+    try:
+        return run_reasoning_engine(req)
+
+    except Exception as e:
+        record_error(str(e))
+
+        print("========== SATCOM DIAGNOSE ERROR ==========")
+        print(traceback.format_exc())
+        print("===========================================")
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 # ======================================================
 # SATCOM v2 ENDPOINT (required by Node backend)
@@ -845,8 +872,20 @@ def diagnose(req: SatcomRequest):
 
 @app.post("/reasoning")
 def reasoning(req: SatcomRequest):
-    return run_reasoning_engine(req)
+    try:
+        return run_reasoning_engine(req)
 
+    except Exception as e:
+        record_error(str(e))
+
+        print("========== SATCOM REASONING ERROR ==========")
+        print(traceback.format_exc())
+        print("============================================")
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 # ======================================================
 # FUTURE TRENDS ENDPOINT
