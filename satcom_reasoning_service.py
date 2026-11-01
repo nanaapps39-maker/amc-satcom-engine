@@ -596,8 +596,14 @@ def run_reasoning_engine(req: SatcomRequest):
         intent = "lock_failure"
     if "acu" in msg:
         intent = "antenna_control_issue"
-    if "modem" in msg:
-        intent = "modem_state_issue"
+    if "modem offline" in msg:
+       intent = "modem_state_issue"
+
+    elif "carrier acquisition" in msg:
+       intent = "modem_state_issue"
+
+    elif "modem alarm" in msg:
+       intent = "modem_state_issue"
     if "bvlos" in msg or "bslos" in msg:
         intent = "bvlos_link_issue"
 
