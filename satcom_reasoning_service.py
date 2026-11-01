@@ -783,7 +783,7 @@ def run_reasoning_engine(req: SatcomRequest):
     historical_validation = run_historical_validation(user_message)
 
     response = {
-       "intent": intent,
+       "intent": primary_cause,
        "module": req.module,
        "primaryCause": primary_cause,
        "secondaryCause": secondary_cause,
