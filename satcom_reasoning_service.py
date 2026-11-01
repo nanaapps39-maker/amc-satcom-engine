@@ -568,6 +568,26 @@ def run_reasoning_engine(req: SatcomRequest):
     intent = "general_satcom_issue"
     msg = user_message.lower()
 
+    signal_instability_score = 0
+    congestion_score = 0
+    weather_score = 0
+    modem_score = 0
+    antenna_score = 0
+    rf_chain_score = 0
+
+    if "packet loss" in msg:
+       signal_instability_score += 2
+       congestion_score += 1
+
+    if "latency" in msg:
+       congestion_score += 2
+
+    if "high latency" in msg:
+       congestion_score += 3
+
+    if "jitter" in msg:
+       congestion_score += 2
+
     if "tx" in msg:
         intent = "transmit_issue"
     if "rx" in msg:
@@ -580,6 +600,66 @@ def run_reasoning_engine(req: SatcomRequest):
         intent = "modem_state_issue"
     if "bvlos" in msg or "bslos" in msg:
         intent = "bvlos_link_issue"
+
+    if "signal" in msg:
+       rf_chain_score += 2
+
+    if "signal fluctuation" in msg:
+      rf_chain_score += 3
+
+    if "dbm" in msg:
+      rf_chain_score += 2
+
+    if "rain" in msg:
+      weather_score += 3
+
+    if "weather fade" in msg:
+      weather_score += 4
+
+    if "storm" in msg:
+      weather_score += 5
+
+    if "antenna" in msg:
+      antenna_score += 2
+
+    if "tracking" in msg:
+      antenna_score += 2
+
+    if "carrier acquisition" in msg:
+      modem_score += 4
+
+    if "modem offline" in msg:
+      modem_score += 5
+
+    if "alarm" in msg:
+      modem_score += 2
+
+    diagnostic_scores = {
+        "rf_signal_instability": rf_chain_score,
+        "network_congestion": congestion_score,
+        "weather_fade": weather_score,
+        "antenna_tracking_issue": antenna_score,
+        "modem_state_issue": modem_score
+    }
+
+    primary_cause = max(
+        diagnostic_scores,
+        key=diagnostic_scores.get
+    )
+
+    highest_score = max(diagnostic_scores.values())
+
+    if highest_score >= 8:
+        severity = "High"
+    elif highest_score >= 5:
+        severity = "Medium"
+    else:
+        severity = "Low"
+
+    confidence = min(
+        95,
+        50 + highest_score * 5
+    )
 
     rf_scores = {
         "antenna_pointing": 0.82,
@@ -673,8 +753,11 @@ def run_reasoning_engine(req: SatcomRequest):
         )
 
     final_summary = (
-        f"SATCOM diagnostic completed. Intent: {intent}. "
-        f"RF chain scores analysed. Recommended fix provided."
+         f"SATCOM diagnostic completed. "
+         f"Primary cause: {primary_cause}. "
+         f"Severity: {severity}. "
+         f"Confidence: {confidence}%. "
+         f"Recommended fix provided."
     )
     if bvlos_context:
         final_summary += " BVLOS link health and OEM compliance evaluated."
@@ -683,14 +766,18 @@ def run_reasoning_engine(req: SatcomRequest):
     historical_validation = run_historical_validation(user_message)
 
     response = {
-        "intent": intent,
-        "module": req.module,
-        "logSummary": log_summary,
-        "rfChainScores": rf_scores,
-        "recommendedFix": recommended_fix,
-        "finalSummary": final_summary,
-        "historicalValidation": historical_validation,
-        "insights": insights
+       "intent": intent,
+       "module": req.module,
+       "primaryCause": primary_cause,
+       "secondaryCause": secondary_cause,
+       "severity": severity,
+       "confidence": confidence,
+       "logSummary": log_summary,
+       "rfChainScores": rf_scores,
+       "recommendedFix": recommended_fix,
+       "finalSummary": final_summary,
+       "historicalValidation": historical_validation,
+       "insights": insights
     }
 
     if bvlos_context:
