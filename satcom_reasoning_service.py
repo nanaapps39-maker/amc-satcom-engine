@@ -648,6 +648,28 @@ def run_reasoning_engine(req: SatcomRequest):
         "modem_state_issue": modem_score
     }
 
+    
+    # =====================================
+    # Multi‑Vessel Correlation Engine v1
+    # =====================================
+
+    if "multiple vessels" in msg:
+        congestion_score += 4
+        rf_chain_score -= 1
+        antenna_score -= 2
+        modem_score -= 2
+
+    if "specific beam region" in msg:
+        congestion_score += 5
+        weather_score += 2
+        rf_chain_score -= 1
+
+    if "beam region" in msg:
+        congestion_score += 3
+
+    if "fleet xpress" in msg and "multiple vessels" in msg:
+        congestion_score += 3
+
     primary_cause = max(
         diagnostic_scores,
         key=diagnostic_scores.get
