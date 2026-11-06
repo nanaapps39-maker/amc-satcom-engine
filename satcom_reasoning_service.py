@@ -666,12 +666,33 @@ def run_reasoning_engine(req: SatcomRequest):
 
     highest_score = max(diagnostic_scores.values())
 
-    if highest_score >= 8:
-        severity = "High"
-    elif highest_score >= 5:
-        severity = "Medium"
+    severity_score = highest_score
+
+    # Operational impact indicators
+    if "degraded throughput" in msg:
+        severity_score += 3
+
+    if "0.8 mbps" in msg:
+        severity_score += 4
+
+    if "acm transitions" in msg:
+       severity_score += 2
+
+    if "specific beam region" in msg:
+       severity_score += 3
+
+    if "multiple vessels" in msg:
+       severity_score += 3
+
+    if severity_score >= 12:
+       severity = "Critical"
+    elif severity_score >= 8:
+       severity = "High"
+    elif severity_score >= 5:
+       severity = "Medium"
     else:
-        severity = "Low"
+       severity = "Low"
+
 
     confidence = min(
         95,
