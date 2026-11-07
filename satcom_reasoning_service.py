@@ -694,9 +694,23 @@ def run_reasoning_engine(req: SatcomRequest):
        severity = "Low"
 
 
+    confidence_score = highest_score
+
+    if "degraded throughput" in msg:
+        confidence_score += 2
+
+    if "acm transitions" in msg:
+        confidence_score += 2
+
+    if "specific beam region" in msg:
+       confidence_score += 2
+
+    if "multiple vessels" in msg:
+       confidence_score += 2
+
     confidence = min(
-        95,
-        50 + highest_score * 5
+       95,
+       50 + confidence_score * 5
     )
 
     rf_scores = {
