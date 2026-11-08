@@ -26,6 +26,9 @@ import uvicorn
 # Lives in: satcom_insights_engine.py
 from satcom_insights_engine import run_satcom_insights
 
+from voyage.voyage_intelligence import generate_voyage_analysis
+from voyage.route_calculations import calculate_great_circle_distance
+
 
 # ======================================================
 # REQUEST MODEL
@@ -568,6 +571,33 @@ def run_reasoning_engine(req: SatcomRequest):
     intent = "general_satcom_issue"
     msg = user_message.lower()
 
+
+    # =====================================
+    # Voyage Intelligence Engine
+    # =====================================
+
+    if (
+        "voyage intelligence" in msg or
+        "great-circle distance" in msg or
+        "eta" in msg
+    ):
+
+        analysis = generate_voyage_analysis(
+            "lng_carrier",
+            2820
+        )
+
+        return {
+            "intent": "voyage_intelligence",
+            "module": req.module,
+            "voyageAnalysis": analysis,
+            "finalSummary": (
+                f"Voyage analysis completed. "
+                f"ETA: {analysis['eta_days']} days. "
+                f"Fuel: {analysis['fuel_consumption_tonnes']} tonnes."
+            )
+        }
+
     signal_instability_score = 0
     congestion_score = 0
     weather_score = 0
@@ -704,15 +734,15 @@ def run_reasoning_engine(req: SatcomRequest):
         beam_score += 3
 
 
-        diagnostic_scores = {
-        "beam_region_degradation": beam_score,
-        "rf_signal_instability": rf_chain_score,
-        "network_congestion": congestion_score,
-        "weather_fade": weather_score,
-        "antenna_tracking_issue": antenna_score,
-        "modem_state_issue": modem_score
-    }
-    
+    diagnostic_scores = {
+       "beam_region_degradation": beam_score,
+       "rf_signal_instability": rf_chain_score,
+       "network_congestion": congestion_score,
+       "weather_fade": weather_score,
+       "antenna_tracking_issue": antenna_score,
+       "modem_state_issue": modem_score
+    }    
+
     primary_cause = max(
         diagnostic_scores,
         key=diagnostic_scores.get
