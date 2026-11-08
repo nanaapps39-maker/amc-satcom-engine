@@ -30,3 +30,34 @@ def calculate_great_circle_distance(
     )
 
     return round(R * c, 2)
+
+def calculate_voyage_time(
+    distance_nm,
+    speed_knots
+):
+
+    if speed_knots <= 0:
+        return None
+
+    hours = distance_nm / speed_knots
+
+    return {
+        "hours": round(hours, 2),
+        "days": round(hours / 24, 2)
+    }
+
+
+def calculate_route_efficiency(
+    great_circle_distance,
+    actual_route_distance
+):
+
+    if actual_route_distance <= 0:
+        return None
+
+    efficiency = (
+        great_circle_distance /
+        actual_route_distance
+    ) * 100
+
+    return round(efficiency, 2)
