@@ -640,6 +640,35 @@ def run_reasoning_engine(req: SatcomRequest):
     if "alarm" in msg:
       modem_score += 2
 
+    # =====================================
+    # Multi‑Vessel Correlation Engine v1
+    # =====================================
+
+    if "multiple vessels" in msg:
+        congestion_score += 4
+        antenna_score = max(0, antenna_score - 2)
+        modem_score = max(0, modem_score - 2)
+
+    if "same beam region" in msg:
+        congestion_score += 5
+        weather_score += 1
+        antenna_score = max(0, antenna_score - 2)
+
+    if "specific beam region" in msg:
+        congestion_score += 5
+        antenna_score = max(0, antenna_score - 2)
+
+    if "fleet xpress" in msg and "multiple vessels" in msg:
+        congestion_score += 3
+
+    if (
+        "antenna lock" in msg and
+        "modem lock" in msg and
+        "network registration" in msg
+    ):
+        congestion_score += 2
+        antenna_score = max(0, antenna_score - 2)
+
     diagnostic_scores = {
         "rf_signal_instability": rf_chain_score,
         "network_congestion": congestion_score,
