@@ -669,7 +669,43 @@ def run_reasoning_engine(req: SatcomRequest):
         congestion_score += 2
         antenna_score = max(0, antenna_score - 2)
 
-    diagnostic_scores = {
+    # =====================================
+    # Beam Intelligence Engine v1
+    # =====================================
+
+    beam_score = 0
+
+    if "same beam region" in msg:
+        beam_score += 5
+
+    if "specific beam region" in msg:
+        beam_score += 5
+
+    if "multiple vessels" in msg:
+        beam_score += 4
+
+    if "fleet xpress" in msg:
+        beam_score += 2
+
+    if "gateway alarm" in msg:
+        beam_score += 5
+
+    if "gateway alarms" in msg:
+        beam_score += 5
+
+    if "acm transitions" in msg:
+        beam_score += 2
+
+    if (
+        "antenna lock" in msg and
+        "modem lock" in msg and
+        "network registration" in msg
+    ):
+        beam_score += 3
+
+
+        diagnostic_scores = {
+        "beam_region_degradation": beam_score,
         "rf_signal_instability": rf_chain_score,
         "network_congestion": congestion_score,
         "weather_fade": weather_score,
@@ -843,6 +879,13 @@ def run_reasoning_engine(req: SatcomRequest):
         recommended_fix = (
             "Inspect ACU gyro, GPS feed, stabilization motors "
             "and antenna tracking performance."
+        )
+
+    elif primary_cause == "beam_region_degradation":
+        recommended_fix = (
+            "Investigate beam utilisation, review gateway alarms, "
+            "verify ACM policies, analyse shared beam capacity and "
+            "coordinate with the satellite provider NOC."
         )
 
     elif primary_cause == "modem_state_issue":
